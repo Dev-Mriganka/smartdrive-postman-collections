@@ -1,0 +1,653 @@
+{
+	"info": {
+		"_postman_id": "smartdrive-user-service-collection",
+		"name": "SmartDrive User Service",
+		"description": "Complete API collection for SmartDrive User Service with OAuth2 authentication, user management, and admin operations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "smartdrive-user-service"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"{{test_username}}\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"confirmPassword\": \"{{test_password}}\",\n  \"firstName\": \"{{test_first_name}}\",\n  \"lastName\": \"{{test_last_name}}\",\n  \"phoneNumber\": \"{{test_phone}}\",\n  \"bio\": \"{{test_bio}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/register",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"register"
+							]
+						},
+						"description": "Register a new user account. This is a public endpoint that doesn't require authentication.\n\n**Request Body:**\n- `username`: Unique username (3-50 chars, alphanumeric + underscore)\n- `email`: Valid email address\n- `password`: Strong password (min 8 chars, uppercase, lowercase, number, special char)\n- `confirmPassword`: Must match password\n- `firstName`: User's first name (max 100 chars)\n- `lastName`: User's last name (max 100 chars)\n- `phoneNumber`: Optional phone number (international format)\n- `bio`: Optional bio (max 500 chars)\n\n**Response:**\n- `201`: Registration successful, email verification required\n- `400`: Validation error or registration failed"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/verify-email?token={{email_verification_token}}",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"verify-email"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{email_verification_token}}",
+									"description": "Email verification token received via email"
+								}
+							]
+						},
+						"description": "Verify user email address using the token sent during registration.\n\n**Query Parameters:**\n- `token`: Email verification token\n\n**Response:**\n- `200`: Email verified successfully\n- `400`: Invalid or expired token"
+					},
+					"response": []
+				},
+				{
+					"name": "Get OAuth2 Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"description": "OAuth2 grant type"
+								},
+								{
+									"key": "client_id",
+									"value": "{{oauth2_client_id}}",
+									"description": "OAuth2 client ID"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{oauth2_client_secret}}",
+									"description": "OAuth2 client secret"
+								},
+								{
+									"key": "username",
+									"value": "{{test_username}}",
+									"description": "User's username"
+								},
+								{
+									"key": "password",
+									"value": "{{test_password}}",
+									"description": "User's password"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/oauth2/token",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"oauth2",
+								"token"
+							]
+						},
+						"description": "Get OAuth2 access token using Resource Owner Password Credentials flow.\n\n**Form Data:**\n- `grant_type`: Must be 'password'\n- `client_id`: OAuth2 client identifier\n- `client_secret`: OAuth2 client secret\n- `username`: User's username\n- `password`: User's password\n\n**Response:**\n- `200`: Token issued successfully\n- `400`: Invalid credentials or request\n- `401`: Unauthorized client"
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "refresh_token",
+									"description": "OAuth2 grant type"
+								},
+								{
+									"key": "client_id",
+									"value": "{{oauth2_client_id}}",
+									"description": "OAuth2 client ID"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{oauth2_client_secret}}",
+									"description": "OAuth2 client secret"
+								},
+								{
+									"key": "refresh_token",
+									"value": "{{refresh_token}}",
+									"description": "Refresh token from previous login"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/oauth2/token",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"oauth2",
+								"token"
+							]
+						},
+						"description": "Refresh OAuth2 access token using refresh token.\n\n**Form Data:**\n- `grant_type`: Must be 'refresh_token'\n- `client_id`: OAuth2 client identifier\n- `client_secret`: OAuth2 client secret\n- `refresh_token`: Valid refresh token\n\n**Response:**\n- `200`: New token issued successfully\n- `400`: Invalid refresh token\n- `401`: Unauthorized client"
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for user registration, email verification, and OAuth2 token management."
+		},
+		{
+			"name": "👤 User Management",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "OAuth2 access token"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/profile",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"profile"
+							]
+						},
+						"description": "Get current user's profile information.\n\n**Headers:**\n- `Authorization`: Bearer token (required)\n\n**Response:**\n- `200`: User profile data\n- `401`: Unauthorized (invalid/missing token)\n- `404`: User not found"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "OAuth2 access token"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"{{updated_first_name}}\",\n  \"lastName\": \"{{updated_last_name}}\",\n  \"phoneNumber\": \"{{updated_phone}}\",\n  \"bio\": \"{{updated_bio}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/profile",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"profile"
+							]
+						},
+						"description": "Update current user's profile information.\n\n**Headers:**\n- `Authorization`: Bearer token (required)\n\n**Request Body:**\n- `firstName`: Updated first name (optional)\n- `lastName`: Updated last name (optional)\n- `phoneNumber`: Updated phone number (optional)\n- `bio`: Updated bio (optional)\n\n**Response:**\n- `200`: Profile updated successfully\n- `400`: Validation error\n- `401`: Unauthorized"
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "OAuth2 access token"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"{{current_password}}\",\n  \"newPassword\": \"{{new_password}}\",\n  \"confirmNewPassword\": \"{{new_password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/change-password",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"change-password"
+							]
+						},
+						"description": "Change user's password.\n\n**Headers:**\n- `Authorization`: Bearer token (required)\n\n**Request Body:**\n- `currentPassword`: Current password\n- `newPassword`: New password (must meet requirements)\n- `confirmNewPassword`: Must match new password\n\n**Response:**\n- `200`: Password changed successfully\n- `400`: Validation error or incorrect current password\n- `401`: Unauthorized"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Account",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "OAuth2 access token"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/profile",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"profile"
+							]
+						},
+						"description": "Delete current user's account permanently.\n\n**Headers:**\n- `Authorization`: Bearer token (required)\n\n**Response:**\n- `200`: Account deleted successfully\n- `401`: Unauthorized\n- `500`: Server error"
+					},
+					"response": []
+				}
+			],
+			"description": "User profile management endpoints for authenticated users."
+		},
+		{
+			"name": "🔧 Internal Auth Service",
+			"item": [
+				{
+					"name": "Verify Credentials (Internal)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Internal-Auth",
+								"value": "{{internal_auth_secret}}",
+								"description": "Internal authentication secret"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"{{test_username}}\",\n  \"password\": \"{{test_password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/verify-credentials",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"verify-credentials"
+							]
+						},
+						"description": "Internal endpoint for verifying user credentials (used by auth service).\n\n**Headers:**\n- `X-Internal-Auth`: Internal authentication secret\n\n**Request Body:**\n- `username`: User's username\n- `password`: User's password\n\n**Response:**\n- `200`: Credentials verified (valid: true/false)\n- `401`: Unauthorized (invalid internal auth)\n- `500`: Internal server error"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Token Claims (Internal)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Internal-Auth",
+								"value": "{{internal_auth_secret}}",
+								"description": "Internal authentication secret"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/{{test_username}}/token-claims",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{test_username}}",
+								"token-claims"
+							]
+						},
+						"description": "Internal endpoint for getting user token claims (used by auth service).\n\n**Headers:**\n- `X-Internal-Auth`: Internal authentication secret\n\n**Path Parameters:**\n- `username`: User's username\n\n**Response:**\n- `200`: User token claims data\n- `401`: Unauthorized (invalid internal auth)\n- `404`: User not found"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Profile (Internal)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Internal-Auth",
+								"value": "{{internal_auth_secret}}",
+								"description": "Internal authentication secret"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/{{test_username}}/profile",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"{{test_username}}",
+								"profile"
+							]
+						},
+						"description": "Internal endpoint for getting user profile (used by auth service).\n\n**Headers:**\n- `X-Internal-Auth`: Internal authentication secret\n\n**Path Parameters:**\n- `username`: User's username\n\n**Response:**\n- `200`: User profile data\n- `401`: Unauthorized (invalid internal auth)\n- `404`: User not found"
+					},
+					"response": []
+				}
+			],
+			"description": "Internal endpoints used by the Authorization Server for user authentication and profile retrieval."
+		},
+		{
+			"name": "⚙️ Admin Operations",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "OAuth2 access token with ADMIN role"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/admin/users?page={{page}}&size={{size}}&sort={{sort}}",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "{{page}}",
+									"description": "Page number (0-based)"
+								},
+								{
+									"key": "size",
+									"value": "{{size}}",
+									"description": "Page size"
+								},
+								{
+									"key": "sort",
+									"value": "{{sort}}",
+									"description": "Sort field (e.g., username,email,createdAt)"
+								}
+							]
+						},
+						"description": "Get paginated list of all users (admin only).\n\n**Headers:**\n- `Authorization`: Bearer token with ADMIN role\n\n**Query Parameters:**\n- `page`: Page number (default: 0)\n- `size`: Page size (default: 20)\n- `sort`: Sort field (default: createdAt)\n\n**Response:**\n- `200`: Paginated user list\n- `401`: Unauthorized\n- `403`: Forbidden (insufficient privileges)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "OAuth2 access token with ADMIN role"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/admin/statistics",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"statistics"
+							]
+						},
+						"description": "Get user statistics and metrics (admin only).\n\n**Headers:**\n- `Authorization`: Bearer token with ADMIN role\n\n**Response:**\n- `200`: User statistics data\n- `401`: Unauthorized\n- `403`: Forbidden (insufficient privileges)"
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle User Account",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "OAuth2 access token with ADMIN role"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"enabled\": {{toggle_enabled}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/admin/users/{{user_id}}/toggle",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"users",
+								"{{user_id}}",
+								"toggle"
+							]
+						},
+						"description": "Enable or disable a user account (admin only).\n\n**Headers:**\n- `Authorization`: Bearer token with ADMIN role\n\n**Path Parameters:**\n- `user_id`: User's ID\n\n**Request Body:**\n- `enabled`: Boolean to enable/disable account\n\n**Response:**\n- `200`: Account status updated\n- `401`: Unauthorized\n- `403`: Forbidden\n- `404`: User not found"
+					},
+					"response": []
+				},
+				{
+					"name": "Assign User Roles",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "OAuth2 access token with ADMIN role"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roles\": [\"{{role_name}}\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/admin/users/{{user_id}}/roles",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"users",
+								"{{user_id}}",
+								"roles"
+							]
+						},
+						"description": "Assign roles to a user (admin only).\n\n**Headers:**\n- `Authorization`: Bearer token with ADMIN role\n\n**Path Parameters:**\n- `user_id`: User's ID\n\n**Request Body:**\n- `roles`: Array of role names\n\n**Response:**\n- `200`: Roles assigned successfully\n- `401`: Unauthorized\n- `403`: Forbidden\n- `404`: User not found"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "OAuth2 access token with ADMIN role"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/admin/users/{{user_id}}",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"users",
+								"{{user_id}}"
+							]
+						},
+						"description": "Delete a user account permanently (admin only).\n\n**Headers:**\n- `Authorization`: Bearer token with ADMIN role\n\n**Path Parameters:**\n- `user_id`: User's ID\n\n**Response:**\n- `200`: User deleted successfully\n- `401`: Unauthorized\n- `403`: Forbidden\n- `404`: User not found"
+					},
+					"response": []
+				}
+			],
+			"description": "Administrative endpoints for user management (requires ADMIN role)."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-generate test data if not set",
+					"if (!pm.environment.get('test_username')) {",
+					"    pm.environment.set('test_username', 'testuser_' + Date.now());",
+					"}",
+					"if (!pm.environment.get('test_email')) {",
+					"    pm.environment.set('test_email', 'test_' + Date.now() + '@example.com');",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "gateway_base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "oauth2_client_id",
+			"value": "smartdrive-web",
+			"type": "string"
+		},
+		{
+			"key": "oauth2_client_secret",
+			"value": "secret",
+			"type": "string"
+		},
+		{
+			"key": "internal_auth_secret",
+			"value": "internal-secret-key-2024",
+			"type": "string"
+		}
+	]
+}

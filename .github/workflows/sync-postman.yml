@@ -1,0 +1,78 @@
+name: Sync Postman Collection
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'collections/**'
+      - 'environments/**'
+
+jobs:
+  sync-postman:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: |
+        npm install -g newman
+        npm install -g @postman/newman-reporter-htmlextra
+        
+    - name: Sync Collection
+      env:
+        POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+        POSTMAN_WORKSPACE_ID: ${{ secrets.POSTMAN_WORKSPACE_ID }}
+        POSTMAN_COLLECTION_ID: ${{ secrets.POSTMAN_COLLECTION_ID }}
+      run: |
+        # Update collection
+        if [ -f "collections/SmartDrive-User-Service-Collection.json" ]; then
+          echo "Updating Postman collection..."
+          curl -X PUT \
+            -H "X-API-Key: $POSTMAN_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @collections/SmartDrive-User-Service-Collection.json \
+            "https://api.getpostman.com/collections/$POSTMAN_COLLECTION_ID"
+        fi
+        
+        # Update environment
+        if [ -f "environments/SmartDrive-Dev-Environment.json" ]; then
+          echo "Updating Postman environment..."
+          # Note: Environment update requires environment ID
+          # This is a placeholder - you'll need to set POSTMAN_ENVIRONMENT_ID
+          if [ ! -z "$POSTMAN_ENVIRONMENT_ID" ]; then
+            curl -X PUT \
+              -H "X-API-Key: $POSTMAN_API_KEY" \
+              -H "Content-Type: application/json" \
+              -d @environments/SmartDrive-Dev-Environment.json \
+              "https://api.getpostman.com/environments/$POSTMAN_ENVIRONMENT_ID"
+          fi
+        fi
+        
+    - name: Test Collection
+      env:
+        POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+        POSTMAN_COLLECTION_ID: ${{ secrets.POSTMAN_COLLECTION_ID }}
+      run: |
+        # Run collection tests if services are available
+        echo "Running collection tests..."
+        # Note: This requires the services to be running
+        # You might want to skip this in CI or run against a test environment
+        
+    - name: Notify Success
+      if: success()
+      run: |
+        echo "✅ Postman collection synced successfully!"
+        echo "Collection updated at: $(date)"
+        
+    - name: Notify Failure
+      if: failure()
+      run: |
+        echo "❌ Failed to sync Postman collection"
+        echo "Check the logs above for details"
