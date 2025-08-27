@@ -23,7 +23,6 @@ jobs:
     - name: Install dependencies
       run: |
         npm install -g newman
-        npm install -g @postman/newman-reporter-htmlextra
         
     - name: Sync User Service Collection
       env:
