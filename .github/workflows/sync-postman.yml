@@ -36,8 +36,8 @@ jobs:
         
         if [ -f "collections/SmartDrive-User-Service-Collection.json" ]; then
           echo "📁 Collection file found, updating..."
-          # Create the proper request body
-          echo "{\"collection\": $(cat collections/SmartDrive-User-Service-Collection.json)}" > temp_request.json
+          # Create the proper request body using jq
+          jq -n --argfile collection collections/SmartDrive-User-Service-Collection.json '{collection: $collection}' > temp_request.json
           echo "📄 Request body preview (first 200 chars):"
           head -c 200 temp_request.json
           echo "..."
