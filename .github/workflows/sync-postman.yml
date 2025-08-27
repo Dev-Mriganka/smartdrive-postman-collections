@@ -36,10 +36,16 @@ jobs:
         
         if [ -f "collections/SmartDrive-User-Service-Collection.json" ]; then
           echo "📁 Collection file found, updating..."
+          # Create the proper request body
+          echo "{\"collection\": $(cat collections/SmartDrive-User-Service-Collection.json)}" > temp_request.json
+          echo "📄 Request body preview (first 200 chars):"
+          head -c 200 temp_request.json
+          echo "..."
+          
           response=$(curl -s -w "%{http_code}" -X PUT \
             -H "X-API-Key: $POSTMAN_API_KEY" \
             -H "Content-Type: application/json" \
-            -d "{\"collection\": $(cat collections/SmartDrive-User-Service-Collection.json)}" \
+            -d @temp_request.json \
             "https://api.getpostman.com/collections/$POSTMAN_USER_COLLECTION_ID")
           
           http_code="${response: -3}"
