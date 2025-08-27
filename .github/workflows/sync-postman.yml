@@ -39,7 +39,7 @@ jobs:
           response=$(curl -s -w "%{http_code}" -X PUT \
             -H "X-API-Key: $POSTMAN_API_KEY" \
             -H "Content-Type: application/json" \
-            -d @collections/SmartDrive-User-Service-Collection.json \
+            -d "{\"collection\": $(cat collections/SmartDrive-User-Service-Collection.json)}" \
             "https://api.getpostman.com/collections/$POSTMAN_USER_COLLECTION_ID")
           
           http_code="${response: -3}"
