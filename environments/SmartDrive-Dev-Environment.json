@@ -21,8 +21,8 @@
 			"enabled": true
 		},
 		{
-			"key": "internal_auth_secret",
-			"value": "internal-secret-key-2024",
+					"key": "internal_auth_secret",
+		"value": "internal-auth-key",
 			"type": "default",
 			"enabled": true
 		},
