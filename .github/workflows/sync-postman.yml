@@ -6,7 +6,6 @@ on:
     paths:
       - 'collections/**'
       - 'environments/**'
-  workflow_dispatch:  # Manual trigger
 
 jobs:
   sync-postman:
@@ -38,7 +37,7 @@ jobs:
         if [ -f "collections/SmartDrive-User-Service-Collection.json" ]; then
           echo "📁 Collection file found, updating..."
           # Create the proper request body using jq
-          jq -n --argfile collection collections/SmartDrive-User-Service-Collection.json '{collection: $collection}' > temp_request.json
+          jq -n --slurpfile collection collections/SmartDrive-User-Service-Collection.json '{collection: $collection[0]}' > temp_request.json
           echo "📄 Request body preview (first 200 chars):"
           head -c 200 temp_request.json
           echo "..."
