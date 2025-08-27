@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "smartdrive-user-service-collection",
 		"name": "SmartDrive User Service",
-		"description": "Complete API collection for SmartDrive User Service with OAuth2 authentication, user management, and admin operations - Auto-sync enabled",
+		"description": "Complete API collection for SmartDrive User Service with OAuth2 authentication, user management, and admin operations - Auto-sync enabled - Fixed workflow",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "smartdrive-user-service"
 	},

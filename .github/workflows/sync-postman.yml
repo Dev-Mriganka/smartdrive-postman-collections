@@ -30,99 +30,36 @@ jobs:
         POSTMAN_WORKSPACE_ID: ${{ secrets.POSTMAN_WORKSPACE_ID }}
         POSTMAN_USER_COLLECTION_ID: ${{ secrets.POSTMAN_USER_COLLECTION_ID }}
       run: |
+        echo "🔄 Starting User Service Collection sync..."
+        echo "API Key: ${POSTMAN_API_KEY:0:10}..."
+        echo "Collection ID: $POSTMAN_USER_COLLECTION_ID"
+        
         if [ -f "collections/SmartDrive-User-Service-Collection.json" ]; then
-          echo "🔄 Updating User Service Collection..."
-          curl -X PUT \
+          echo "📁 Collection file found, updating..."
+          response=$(curl -s -w "%{http_code}" -X PUT \
             -H "X-API-Key: $POSTMAN_API_KEY" \
             -H "Content-Type: application/json" \
             -d @collections/SmartDrive-User-Service-Collection.json \
-            "https://api.getpostman.com/collections/$POSTMAN_USER_COLLECTION_ID"
-          echo "✅ User Service Collection updated!"
-        fi
-        
-    - name: Sync Auth Service Collection
-      env:
-        POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
-        POSTMAN_WORKSPACE_ID: ${{ secrets.POSTMAN_WORKSPACE_ID }}
-        POSTMAN_AUTH_COLLECTION_ID: ${{ secrets.POSTMAN_AUTH_COLLECTION_ID }}
-      run: |
-        if [ -f "collections/SmartDrive-Auth-Service-Collection.json" ]; then
-          echo "🔄 Updating Auth Service Collection..."
-          curl -X PUT \
-            -H "X-API-Key: $POSTMAN_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d @collections/SmartDrive-Auth-Service-Collection.json \
-            "https://api.getpostman.com/collections/$POSTMAN_AUTH_COLLECTION_ID"
-          echo "✅ Auth Service Collection updated!"
-        fi
-        
-    - name: Sync File Storage Collection
-      env:
-        POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
-        POSTMAN_WORKSPACE_ID: ${{ secrets.POSTMAN_WORKSPACE_ID }}
-        POSTMAN_FILE_STORAGE_COLLECTION_ID: ${{ secrets.POSTMAN_FILE_STORAGE_COLLECTION_ID }}
-      run: |
-        if [ -f "collections/SmartDrive-File-Storage-Collection.json" ]; then
-          echo "🔄 Updating File Storage Collection..."
-          curl -X PUT \
-            -H "X-API-Key: $POSTMAN_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d @collections/SmartDrive-File-Storage-Collection.json \
-            "https://api.getpostman.com/collections/$POSTMAN_FILE_STORAGE_COLLECTION_ID"
-          echo "✅ File Storage Collection updated!"
-        fi
-        
-    - name: Sync Search Service Collection
-      env:
-        POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
-        POSTMAN_WORKSPACE_ID: ${{ secrets.POSTMAN_WORKSPACE_ID }}
-        POSTMAN_SEARCH_COLLECTION_ID: ${{ secrets.POSTMAN_SEARCH_COLLECTION_ID }}
-      run: |
-        if [ -f "collections/SmartDrive-Search-Service-Collection.json" ]; then
-          echo "🔄 Updating Search Service Collection..."
-          curl -X PUT \
-            -H "X-API-Key: $POSTMAN_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d @collections/SmartDrive-Search-Service-Collection.json \
-            "https://api.getpostman.com/collections/$POSTMAN_SEARCH_COLLECTION_ID"
-          echo "✅ Search Service Collection updated!"
-        fi
-        
-    - name: Sync AI Service Collection
-      env:
-        POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
-        POSTMAN_WORKSPACE_ID: ${{ secrets.POSTMAN_WORKSPACE_ID }}
-        POSTMAN_AI_COLLECTION_ID: ${{ secrets.POSTMAN_AI_COLLECTION_ID }}
-      run: |
-        if [ -f "collections/SmartDrive-AI-Service-Collection.json" ]; then
-          echo "🔄 Updating AI Service Collection..."
-          curl -X PUT \
-            -H "X-API-Key: $POSTMAN_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d @collections/SmartDrive-AI-Service-Collection.json \
-            "https://api.getpostman.com/collections/$POSTMAN_AI_COLLECTION_ID"
-          echo "✅ AI Service Collection updated!"
-        fi
-        
-    - name: Sync Environment
-      env:
-        POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
-        POSTMAN_WORKSPACE_ID: ${{ secrets.POSTMAN_WORKSPACE_ID }}
-        POSTMAN_ENVIRONMENT_ID: ${{ secrets.POSTMAN_ENVIRONMENT_ID }}
-      run: |
-        if [ -f "environments/SmartDrive-Dev-Environment.json" ]; then
-          echo "🔄 Updating Development Environment..."
-          if [ ! -z "$POSTMAN_ENVIRONMENT_ID" ]; then
-            curl -X PUT \
-              -H "X-API-Key: $POSTMAN_API_KEY" \
-              -H "Content-Type: application/json" \
-              -d @environments/SmartDrive-Dev-Environment.json \
-              "https://api.getpostman.com/environments/$POSTMAN_ENVIRONMENT_ID"
-            echo "✅ Development Environment updated!"
+            "https://api.getpostman.com/collections/$POSTMAN_USER_COLLECTION_ID")
+          
+          http_code="${response: -3}"
+          body="${response%???}"
+          
+          echo "Response Code: $http_code"
+          echo "Response Body: $body"
+          
+          if [ "$http_code" = "200" ]; then
+            echo "✅ User Service Collection updated successfully!"
           else
-            echo "⚠️  No environment ID set, skipping environment update"
+            echo "❌ Failed to update collection. HTTP Code: $http_code"
+            exit 1
           fi
+        else
+          echo "❌ Collection file not found!"
+          exit 1
         fi
+        
+
         
     - name: Notify Success
       if: success()
