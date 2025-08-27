@@ -21,8 +21,8 @@
 			"enabled": true
 		},
 		{
-					"key": "internal_auth_secret",
-		"value": "internal-auth-key",
+			"key": "internal_auth_secret",
+			"value": "internal-secret-key-2024",
 			"type": "default",
 			"enabled": true
 		},
@@ -155,6 +155,24 @@
 		{
 			"key": "sort",
 			"value": "createdAt",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "search_query",
+			"value": "test document",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "file_id",
+			"value": "1",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "admin_access_token",
+			"value": "",
 			"type": "default",
 			"enabled": true
 		}

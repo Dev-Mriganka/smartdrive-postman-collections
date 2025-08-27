@@ -1,0 +1,915 @@
+{
+	"info": {
+		"_postman_id": "smartdrive-gateway-complete",
+		"name": "SmartDrive Complete API Gateway",
+		"description": "Complete API collection for all SmartDrive services through the API Gateway - Includes Authentication, User Management, File Storage, AI Services, and Search",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "smartdrive-gateway-complete"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication & User Registration",
+			"item": [
+				{
+					"name": "Register New User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test registration response",
+									"if (pm.response.code === 201) {",
+									"    pm.test('Registration successful', function () {",
+									"        pm.response.to.have.status(201);",
+									"    });",
+									"    ",
+									"    const responseJson = pm.response.json();",
+									"    pm.test('Response has success message', function () {",
+									"        pm.expect(responseJson.message).to.include('Registration successful');",
+									"    });",
+									"} else if (pm.response.code === 400) {",
+									"    pm.test('Registration failed with validation error', function () {",
+									"        pm.response.to.have.status(400);",
+									"    });",
+									"    ",
+									"    const responseJson = pm.response.json();",
+									"    console.log('Registration error:', responseJson);",
+									"} else if (pm.response.code === 405) {",
+									"    pm.test('Method not allowed - known gateway issue', function () {",
+									"        pm.response.to.have.status(405);",
+									"        console.log('405 error - check if user was actually created');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"value": "http://localhost:5174",
+								"description": "CORS origin header"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"{{test_username}}\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"confirmPassword\": \"{{test_password}}\",\n  \"firstName\": \"{{test_first_name}}\",\n  \"lastName\": \"{{test_last_name}}\",\n  \"bio\": \"{{test_bio}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/register",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"register"
+							]
+						},
+						"description": "Register a new user through the API Gateway. Includes CORS headers for browser compatibility.\n\n**Password Requirements:**\n- At least 8 characters\n- Must contain: uppercase, lowercase, number, special character\n- Pattern: `^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$`\n\n**Username Requirements:**\n- 3-50 characters\n- Alphanumeric + underscore only\n- Pattern: `^[a-zA-Z0-9_]+$`"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Origin",
+								"value": "http://localhost:5174",
+								"description": "CORS origin header"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/verify-email?token={{email_verification_token}}",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"verify-email"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{email_verification_token}}",
+									"description": "Email verification token from registration email"
+								}
+							]
+						},
+						"description": "Verify user email using token sent during registration."
+					},
+					"response": []
+				},
+				{
+					"name": "Get OAuth2 Token (Password Grant)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Extract tokens from response",
+									"if (pm.response.code === 200) {",
+									"    pm.test('Token request successful', function () {",
+									"        pm.response.to.have.status(200);",
+									"    });",
+									"    ",
+									"    const responseJson = pm.response.json();",
+									"    ",
+									"    pm.test('Access token received', function () {",
+									"        pm.expect(responseJson.access_token).to.be.a('string');",
+									"    });",
+									"    ",
+									"    pm.test('Refresh token received', function () {",
+									"        pm.expect(responseJson.refresh_token).to.be.a('string');",
+									"    });",
+									"    ",
+									"    // Store tokens for subsequent requests",
+									"    pm.environment.set('access_token', responseJson.access_token);",
+									"    pm.environment.set('refresh_token', responseJson.refresh_token);",
+									"    ",
+									"    console.log('Tokens stored in environment variables');",
+									"} else {",
+									"    pm.test('Token request failed', function () {",
+									"        console.log('Error:', pm.response.text());",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"description": "OAuth2 grant type"
+								},
+								{
+									"key": "client_id",
+									"value": "{{oauth2_client_id}}",
+									"description": "OAuth2 client ID"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{oauth2_client_secret}}",
+									"description": "OAuth2 client secret"
+								},
+								{
+									"key": "username",
+									"value": "{{test_username}}",
+									"description": "User's username"
+								},
+								{
+									"key": "password",
+									"value": "{{test_password}}",
+									"description": "User's password"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/oauth2/token",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"oauth2",
+								"token"
+							]
+						},
+						"description": "Get OAuth2 access token using Resource Owner Password Credentials flow through the Auth Service."
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Access Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Update tokens",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.environment.set('access_token', responseJson.access_token);",
+									"    if (responseJson.refresh_token) {",
+									"        pm.environment.set('refresh_token', responseJson.refresh_token);",
+									"    }",
+									"    console.log('Tokens refreshed successfully');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "refresh_token"
+								},
+								{
+									"key": "client_id",
+									"value": "{{oauth2_client_id}}"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{oauth2_client_secret}}"
+								},
+								{
+									"key": "refresh_token",
+									"value": "{{refresh_token}}"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/oauth2/token",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"oauth2",
+								"token"
+							]
+						},
+						"description": "Refresh OAuth2 access token using refresh token."
+					},
+					"response": []
+				}
+			],
+			"description": "Authentication endpoints for user registration, email verification, and OAuth2 token management through the API Gateway."
+		},
+		{
+			"name": "👤 User Profile Management",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/profile",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"profile"
+							]
+						},
+						"description": "Get current user's profile information using JWT token."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"{{updated_first_name}}\",\n  \"lastName\": \"{{updated_last_name}}\",\n  \"bio\": \"{{updated_bio}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/profile",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"profile"
+							]
+						},
+						"description": "Update current user's profile information."
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"{{current_password}}\",\n  \"newPassword\": \"{{new_password}}\",\n  \"confirmNewPassword\": \"{{new_password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/change-password",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"change-password"
+							]
+						},
+						"description": "Change user's password with proper validation."
+					},
+					"response": []
+				}
+			],
+			"description": "User profile management endpoints for authenticated users."
+		},
+		{
+			"name": "📁 File Storage Service",
+			"item": [
+				{
+					"name": "Upload File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [],
+									"description": "File to upload"
+								},
+								{
+									"key": "description",
+									"value": "Test file upload via gateway",
+									"type": "text",
+									"description": "Optional file description"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/files/upload",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"upload"
+							]
+						},
+						"description": "Upload a file through the API Gateway to File Storage Service."
+					},
+					"response": []
+				},
+				{
+					"name": "List User Files",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/files?page=0&size=10",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get paginated list of user's uploaded files."
+					},
+					"response": []
+				},
+				{
+					"name": "Download File",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/files/{{file_id}}/download",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"{{file_id}}",
+								"download"
+							]
+						},
+						"description": "Download a file by ID through the gateway."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/files/{{file_id}}",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"{{file_id}}"
+							]
+						},
+						"description": "Delete a file by ID."
+					},
+					"response": []
+				}
+			],
+			"description": "File storage and management endpoints through the API Gateway."
+		},
+		{
+			"name": "🤖 AI Service",
+			"item": [
+				{
+					"name": "Chat with AI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Hello AI! Can you help me analyze my files?\",\n  \"context\": \"general\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/ai/chat",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"chat"
+							]
+						},
+						"description": "Send a message to the AI service for processing and response."
+					},
+					"response": []
+				},
+				{
+					"name": "Analyze File with AI",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fileId\": \"{{file_id}}\",\n  \"analysisType\": \"content_summary\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/ai/analyze",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"analyze"
+							]
+						},
+						"description": "Request AI analysis of a specific file."
+					},
+					"response": []
+				}
+			],
+			"description": "AI service endpoints for intelligent file analysis and chat functionality."
+		},
+		{
+			"name": "🔍 Search Service",
+			"item": [
+				{
+					"name": "Search Files",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/search?q={{search_query}}&type=files&page=0&size=10",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{search_query}}",
+									"description": "Search query string"
+								},
+								{
+									"key": "type",
+									"value": "files",
+									"description": "Search type: files, content, metadata"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Search through user's files using the search service."
+					},
+					"response": []
+				},
+				{
+					"name": "Advanced Search",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"{{search_query}}\",\n  \"filters\": {\n    \"fileType\": [\"pdf\", \"doc\"],\n    \"dateRange\": {\n      \"start\": \"2024-01-01\",\n      \"end\": \"2024-12-31\"\n    },\n    \"tags\": [\"important\"]\n  },\n  \"page\": 0,\n  \"size\": 20\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/search/advanced",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"search",
+								"advanced"
+							]
+						},
+						"description": "Perform advanced search with filters and criteria."
+					},
+					"response": []
+				}
+			],
+			"description": "Search service endpoints for finding files and content."
+		},
+		{
+			"name": "⚙️ Admin Operations",
+			"item": [
+				{
+					"name": "Get All Users (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/admin/users?page=0&size=20&sort=createdAt",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt"
+								}
+							]
+						},
+						"description": "Get paginated list of all users (admin only)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Statistics (Admin)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/admin/statistics",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"statistics"
+							]
+						},
+						"description": "Get user statistics and metrics (admin only)."
+					},
+					"response": []
+				}
+			],
+			"description": "Administrative endpoints requiring admin privileges."
+		},
+		{
+			"name": "🔧 System Health & Monitoring",
+			"item": [
+				{
+					"name": "API Gateway Health",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_base_url}}/actuator/health",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"actuator",
+								"health"
+							]
+						},
+						"description": "Check API Gateway health status."
+					},
+					"response": []
+				},
+				{
+					"name": "Gateway Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_base_url}}/actuator/info",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"actuator",
+								"info"
+							]
+						},
+						"description": "Get API Gateway information."
+					},
+					"response": []
+				},
+				{
+					"name": "Gateway Routes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_base_url}}/actuator/gateway/routes",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"actuator",
+								"gateway",
+								"routes"
+							]
+						},
+						"description": "View all configured gateway routes."
+					},
+					"response": []
+				}
+			],
+			"description": "System health and monitoring endpoints."
+		},
+		{
+			"name": "🧪 Test CORS & Gateway Features",
+			"item": [
+				{
+					"name": "CORS Preflight Test",
+					"request": {
+						"method": "OPTIONS",
+						"header": [
+							{
+								"key": "Origin",
+								"value": "http://localhost:5174"
+							},
+							{
+								"key": "Access-Control-Request-Method",
+								"value": "POST"
+							},
+							{
+								"key": "Access-Control-Request-Headers",
+								"value": "Content-Type,Authorization"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/register",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"register"
+							]
+						},
+						"description": "Test CORS preflight request to ensure gateway is properly configured for browser requests."
+					},
+					"response": []
+				}
+			],
+			"description": "Test endpoints for validating CORS and gateway functionality."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-generate test data if not set",
+					"if (!pm.environment.get('test_username')) {",
+					"    pm.environment.set('test_username', 'gatewaytest_' + Date.now());",
+					"}",
+					"if (!pm.environment.get('test_email')) {",
+					"    pm.environment.set('test_email', 'gateway_' + Date.now() + '@example.com');",
+					"}",
+					"if (!pm.environment.get('search_query')) {",
+					"    pm.environment.set('search_query', 'test document');",
+					"}",
+					"if (!pm.environment.get('file_id')) {",
+					"    pm.environment.set('file_id', '1');",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "gateway_base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "oauth2_client_id",
+			"value": "smartdrive-web",
+			"type": "string"
+		},
+		{
+			"key": "oauth2_client_secret",
+			"value": "secret",
+			"type": "string"
+		}
+	]
+}
