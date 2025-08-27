@@ -6,6 +6,8 @@ on:
     paths:
       - 'collections/**'
       - 'environments/**'
+      - 'TRIGGER_SYNC.md'
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   sync-postman:
