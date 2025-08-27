@@ -22,7 +22,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"{{test_username}}\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"confirmPassword\": \"{{test_password}}\",\n  \"firstName\": \"{{test_first_name}}\",\n  \"lastName\": \"{{test_last_name}}\",\n  \"phoneNumber\": \"{{test_phone}}\",\n  \"bio\": \"{{test_bio}}\"\n}",
+							  "raw": "{\n  \"username\": \"{{test_username}}\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"confirmPassword\": \"{{test_password}}\",\n  \"firstName\": \"{{test_first_name}}\",\n  \"lastName\": \"{{test_last_name}}\",\n  \"bio\": \"{{test_bio}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -41,7 +41,7 @@
 								"register"
 							]
 						},
-						"description": "Register a new user account. This is a public endpoint that doesn't require authentication.\n\n**Request Body:**\n- `username`: Unique username (3-50 chars, alphanumeric + underscore)\n- `email`: Valid email address\n- `password`: Strong password (min 8 chars, uppercase, lowercase, number, special char)\n- `confirmPassword`: Must match password\n- `firstName`: User's first name (max 100 chars)\n- `lastName`: User's last name (max 100 chars)\n- `phoneNumber`: Optional phone number (international format)\n- `bio`: Optional bio (max 500 chars)\n\n**Response:**\n- `201`: Registration successful, email verification required\n- `400`: Validation error or registration failed"
+						"description": "Register a new user account. This is a public endpoint that doesn't require authentication.\n\n**Request Body:**\n- `username`: Unique username (3-50 chars, alphanumeric + underscore)\n- `email`: Valid email address\n- `password`: Strong password (min 8 chars, uppercase, lowercase, number, special char)\n- `confirmPassword`: Must match password\n- `firstName`: User's first name (max 100 chars)\n- `lastName`: User's last name (max 100 chars)\n\n- `bio`: Optional bio (max 500 chars)\n\n**Response:**\n- `201`: Registration successful, email verification required\n- `400`: Validation error or registration failed"
 					},
 					"response": []
 				},
@@ -226,7 +226,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"{{updated_first_name}}\",\n  \"lastName\": \"{{updated_last_name}}\",\n  \"phoneNumber\": \"{{updated_phone}}\",\n  \"bio\": \"{{updated_bio}}\"\n}",
+							  "raw": "{\n  \"firstName\": \"{{updated_first_name}}\",\n  \"lastName\": \"{{updated_last_name}}\",\n  \"bio\": \"{{updated_bio}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -245,7 +245,7 @@
 								"profile"
 							]
 						},
-						"description": "Update current user's profile information.\n\n**Headers:**\n- `Authorization`: Bearer token (required)\n\n**Request Body:**\n- `firstName`: Updated first name (optional)\n- `lastName`: Updated last name (optional)\n- `phoneNumber`: Updated phone number (optional)\n- `bio`: Updated bio (optional)\n\n**Response:**\n- `200`: Profile updated successfully\n- `400`: Validation error\n- `401`: Unauthorized"
+						"description": "Update current user's profile information.\n\n**Headers:**\n- `Authorization`: Bearer token (required)\n\n**Request Body:**\n- `firstName`: Updated first name (optional)\n- `lastName`: Updated last name (optional)\n\n- `bio`: Updated bio (optional)\n\n**Response:**\n- `200`: Profile updated successfully\n- `400`: Validation error\n- `401`: Unauthorized"
 					},
 					"response": []
 				},

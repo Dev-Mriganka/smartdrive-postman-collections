@@ -56,12 +56,7 @@
 			"type": "default",
 			"enabled": true
 		},
-		{
-			"key": "test_phone",
-			"value": "+1234567890",
-			"type": "default",
-			"enabled": true
-		},
+
 		{
 			"key": "test_bio",
 			"value": "Test user for SmartDrive API testing",
@@ -98,12 +93,7 @@
 			"type": "default",
 			"enabled": true
 		},
-		{
-			"key": "updated_phone",
-			"value": "+1987654321",
-			"type": "default",
-			"enabled": true
-		},
+
 		{
 			"key": "updated_bio",
 			"value": "Updated bio for testing",
