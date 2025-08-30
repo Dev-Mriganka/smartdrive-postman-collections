@@ -252,11 +252,12 @@
 							]
 						},
 						"url": {
-							"raw": "{{gateway_base_url}}/oauth2/token",
+							"raw": "{{gateway_base_url}}/auth/oauth2/token",
 							"host": [
 								"{{gateway_base_url}}"
 							],
 							"path": [
+								"auth",
 								"oauth2",
 								"token"
 							]
@@ -316,11 +317,12 @@
 							]
 						},
 						"url": {
-							"raw": "{{gateway_base_url}}/oauth2/token",
+							"raw": "{{gateway_base_url}}/auth/oauth2/token",
 							"host": [
 								"{{gateway_base_url}}"
 							],
 							"path": [
+								"auth",
 								"oauth2",
 								"token"
 							]
@@ -807,7 +809,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{gateway_base_url}}/api/v1/admin/statistics",
+							"raw": "{{gateway_base_url}}/api/v1/admin/users/statistics",
 							"host": [
 								"{{gateway_base_url}}"
 							],
@@ -815,6 +817,7 @@
 								"api",
 								"v1",
 								"admin",
+								"users",
 								"statistics"
 							]
 						},

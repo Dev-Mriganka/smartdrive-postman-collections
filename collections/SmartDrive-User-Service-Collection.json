@@ -114,11 +114,12 @@
 							]
 						},
 						"url": {
-							"raw": "{{gateway_base_url}}/oauth2/token",
+							"raw": "{{gateway_base_url}}/auth/oauth2/token",
 							"host": [
 								"{{gateway_base_url}}"
 							],
 							"path": [
+								"auth",
 								"oauth2",
 								"token"
 							]
@@ -163,11 +164,12 @@
 							]
 						},
 						"url": {
-							"raw": "{{gateway_base_url}}/oauth2/token",
+							"raw": "{{gateway_base_url}}/auth/oauth2/token",
 							"host": [
 								"{{gateway_base_url}}"
 							],
 							"path": [
+								"auth",
 								"oauth2",
 								"token"
 							]
@@ -480,7 +482,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{gateway_base_url}}/api/v1/admin/statistics",
+							"raw": "{{gateway_base_url}}/api/v1/admin/users/statistics",
 							"host": [
 								"{{gateway_base_url}}"
 							],
@@ -488,6 +490,7 @@
 								"api",
 								"v1",
 								"admin",
+								"users",
 								"statistics"
 							]
 						},
@@ -504,23 +507,10 @@
 								"key": "Authorization",
 								"value": "Bearer {{access_token}}",
 								"description": "OAuth2 access token with ADMIN role"
-							},
-							{
-								"key": "Content-Type",
-								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"enabled\": {{toggle_enabled}}\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "{{gateway_base_url}}/api/v1/admin/users/{{user_id}}/toggle",
+							"raw": "{{gateway_base_url}}/api/v1/admin/users/{{admin_target_username}}/toggle",
 							"host": [
 								"{{gateway_base_url}}"
 							],
@@ -529,7 +519,7 @@
 								"v1",
 								"admin",
 								"users",
-								"{{user_id}}",
+								"{{admin_target_username}}",
 								"toggle"
 							]
 						},
@@ -554,7 +544,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"roles\": [\"{{role_name}}\"]\n}",
+							"raw": "[\n  \"{{role_name}}\"\n]",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -562,7 +552,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{gateway_base_url}}/api/v1/admin/users/{{user_id}}/roles",
+							"raw": "{{gateway_base_url}}/api/v1/admin/users/{{admin_target_username}}/roles",
 							"host": [
 								"{{gateway_base_url}}"
 							],
@@ -571,7 +561,7 @@
 								"v1",
 								"admin",
 								"users",
-								"{{user_id}}",
+								"{{admin_target_username}}",
 								"roles"
 							]
 						},
@@ -591,7 +581,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{gateway_base_url}}/api/v1/admin/users/{{user_id}}",
+							"raw": "{{gateway_base_url}}/api/v1/admin/users/{{admin_target_username}}",
 							"host": [
 								"{{gateway_base_url}}"
 							],
@@ -600,7 +590,7 @@
 								"v1",
 								"admin",
 								"users",
-								"{{user_id}}"
+								"{{admin_target_username}}"
 							]
 						},
 						"description": "Delete a user account permanently (admin only).\n\n**Headers:**\n- `Authorization`: Bearer token with ADMIN role\n\n**Path Parameters:**\n- `user_id`: User's ID\n\n**Response:**\n- `200`: User deleted successfully\n- `401`: Unauthorized\n- `403`: Forbidden\n- `404`: User not found"
