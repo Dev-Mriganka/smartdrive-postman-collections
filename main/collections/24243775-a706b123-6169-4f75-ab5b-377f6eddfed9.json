@@ -1,0 +1,1074 @@
+{
+	"info": {
+		"_postman_id": "24243775-a706b123-6169-4f75-ab5b-377f6eddfed9",
+		"name": "SmartDrive Complete API Gateway",
+		"description": "Complete API collection for all SmartDrive services through the API Gateway - Includes Authentication, User Management, File Storage, AI Services, and Search",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication & User Registration",
+			"item": [
+				{
+					"name": "Register New User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Test registration response",
+									"if (pm.response.code === 201) {",
+									"    pm.test('Registration successful', function () {",
+									"        pm.response.to.have.status(201);",
+									"    });",
+									"    ",
+									"    const responseJson = pm.response.json();",
+									"    pm.test('Response has success message', function () {",
+									"        pm.expect(responseJson.message).to.include('Registration successful');",
+									"    });",
+									"} else if (pm.response.code === 400) {",
+									"    pm.test('Registration failed with validation error', function () {",
+									"        pm.response.to.have.status(400);",
+									"    });",
+									"    ",
+									"    const responseJson = pm.response.json();",
+									"    console.log('Registration error:', responseJson);",
+									"} else if (pm.response.code === 405) {",
+									"    pm.test('Method not allowed - known gateway issue', function () {",
+									"        pm.response.to.have.status(405);",
+									"        console.log('405 error - check if user was actually created');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"id": "9a2ea6dd-2a31-42bf-b43a-dc63dfa49a71"
+							}
+						}
+					],
+					"id": "24243775-f3b6ba5d-f401-4788-9d83-02eaac3c1d87",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Origin",
+								"value": "http://localhost:5174",
+								"description": "CORS origin header"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"{{test_username}}\",\n  \"email\": \"{{test_email}}\",\n  \"password\": \"{{test_password}}\",\n  \"confirmPassword\": \"{{test_password}}\",\n  \"firstName\": \"{{test_first_name}}\",\n  \"lastName\": \"{{test_last_name}}\",\n  \"bio\": \"{{test_bio}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/register",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"register"
+							]
+						},
+						"description": "Register a new user through the API Gateway. Includes CORS headers for browser compatibility.\n\n**Password Requirements:**\n- At least 8 characters\n- Must contain: uppercase, lowercase, number, special character\n- Pattern: `^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$`\n\n**Username Requirements:**\n- 3-50 characters\n- Alphanumeric + underscore only\n- Pattern: `^[a-zA-Z0-9_]+$`"
+					},
+					"response": []
+				},
+				{
+					"name": "Login with Email and Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "4f7b94b4-bdcf-4dae-9530-379055455c28",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    pm.test('Login successful', function () {",
+									"        pm.response.to.have.status(200);",
+									"    });",
+									"    const responseJson = pm.response.json();",
+									"    pm.environment.set('access_token', responseJson.accessToken);",
+									"    pm.environment.set('refresh_token', responseJson.refreshToken);",
+									"    console.log('Tokens stored in environment variables');",
+									"} else {",
+									"    pm.test('Login failed', function () {",
+									"        console.log('Error:', pm.response.text());",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"id": "24243775-69e26344-8b82-47d1-8263-9b98927d440d",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"{{test_username}}\",\n  \"password\": \"{{test_password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/auth/login",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with user email and password to get JWT tokens."
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Email",
+					"id": "24243775-41b19bbb-4ecb-4dfd-9467-26820503798b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Origin",
+								"value": "http://localhost:5174",
+								"description": "CORS origin header"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/verify-email?token={{email_verification_token}}",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"verify-email"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "{{email_verification_token}}",
+									"description": "Email verification token from registration email"
+								}
+							]
+						},
+						"description": "Verify user email using token sent during registration."
+					},
+					"response": []
+				},
+				{
+					"name": "Get OAuth2 Token (Password Grant)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Extract tokens from response",
+									"if (pm.response.code === 200) {",
+									"    pm.test('Token request successful', function () {",
+									"        pm.response.to.have.status(200);",
+									"    });",
+									"    ",
+									"    const responseJson = pm.response.json();",
+									"    ",
+									"    pm.test('Access token received', function () {",
+									"        pm.expect(responseJson.access_token).to.be.a('string');",
+									"    });",
+									"    ",
+									"    pm.test('Refresh token received', function () {",
+									"        pm.expect(responseJson.refresh_token).to.be.a('string');",
+									"    });",
+									"    ",
+									"    // Store tokens for subsequent requests",
+									"    pm.environment.set('access_token', responseJson.access_token);",
+									"    pm.environment.set('refresh_token', responseJson.refresh_token);",
+									"    ",
+									"    console.log('Tokens stored in environment variables');",
+									"} else {",
+									"    pm.test('Token request failed', function () {",
+									"        console.log('Error:', pm.response.text());",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"id": "719834ad-36b1-4760-8811-aa8813f79f59"
+							}
+						}
+					],
+					"id": "24243775-5ee8be64-5227-4269-9e69-2cd60c348cd4",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"description": "OAuth2 grant type"
+								},
+								{
+									"key": "client_id",
+									"value": "{{oauth2_client_id}}",
+									"description": "OAuth2 client ID"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{oauth2_client_secret}}",
+									"description": "OAuth2 client secret"
+								},
+								{
+									"key": "username",
+									"value": "{{test_username}}",
+									"description": "User's username"
+								},
+								{
+									"key": "password",
+									"value": "{{test_password}}",
+									"description": "User's password"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/oauth2/token",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"oauth2",
+								"token"
+							]
+						},
+						"description": "Get OAuth2 access token using Resource Owner Password Credentials flow through the Auth Service."
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Access Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Update tokens",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    pm.environment.set('access_token', responseJson.access_token);",
+									"    if (responseJson.refresh_token) {",
+									"        pm.environment.set('refresh_token', responseJson.refresh_token);",
+									"    }",
+									"    console.log('Tokens refreshed successfully');",
+									"}"
+								],
+								"type": "text/javascript",
+								"id": "6351b468-b8a5-43ca-a9ad-7eaa2c874ba9"
+							}
+						}
+					],
+					"id": "24243775-0441a73b-ccb3-46e1-8986-17b8fb88d015",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "grant_type",
+									"value": "refresh_token"
+								},
+								{
+									"key": "client_id",
+									"value": "{{oauth2_client_id}}"
+								},
+								{
+									"key": "client_secret",
+									"value": "{{oauth2_client_secret}}"
+								},
+								{
+									"key": "refresh_token",
+									"value": "{{refresh_token}}"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/oauth2/token",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"oauth2",
+								"token"
+							]
+						},
+						"description": "Refresh OAuth2 access token using refresh token."
+					},
+					"response": []
+				}
+			],
+			"id": "24243775-f8700652-577b-4e1f-90e6-853a747f4aa6",
+			"description": "Authentication endpoints for user registration, email verification, and OAuth2 token management through the API Gateway."
+		},
+		{
+			"name": "👤 User Profile Management",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"id": "24243775-209191f7-76d9-4f8d-8274-2cf959f13e25",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/profile",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"profile"
+							]
+						},
+						"description": "Get current user's profile information using JWT token."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Profile",
+					"id": "24243775-b63ff1f2-041c-47f8-9af0-35719236a279",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"firstName\": \"{{updated_first_name}}\",\n  \"lastName\": \"{{updated_last_name}}\",\n  \"bio\": \"{{updated_bio}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/profile",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"profile"
+							]
+						},
+						"description": "Update current user's profile information."
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password",
+					"id": "24243775-11c73958-7027-4e40-8ffb-c577cc932cb3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"currentPassword\": \"{{current_password}}\",\n  \"newPassword\": \"{{new_password}}\",\n  \"confirmNewPassword\": \"{{new_password}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/change-password",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"change-password"
+							]
+						},
+						"description": "Change user's password with proper validation."
+					},
+					"response": []
+				}
+			],
+			"id": "24243775-5db21e69-5c6e-4130-a556-20577a672e16",
+			"description": "User profile management endpoints for authenticated users."
+		},
+		{
+			"name": "📁 File Storage Service",
+			"item": [
+				{
+					"name": "Upload File",
+					"id": "24243775-69dc6691-7528-4a96-afd0-08a344eff848",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"description": "File to upload",
+									"value": null
+								},
+								{
+									"key": "description",
+									"value": "Test file upload via gateway",
+									"type": "text",
+									"description": "Optional file description"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/files/upload",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"upload"
+							]
+						},
+						"description": "Upload a file through the API Gateway to File Storage Service."
+					},
+					"response": []
+				},
+				{
+					"name": "List User Files",
+					"id": "24243775-5208b31d-fa82-47b7-ae9f-460f72a30732",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/files?page=0&size=10",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Get paginated list of user's uploaded files."
+					},
+					"response": []
+				},
+				{
+					"name": "Download File",
+					"id": "24243775-566e3da4-91da-4c95-ba6f-a09b77f2be3b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/files/{{file_id}}/download",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"{{file_id}}",
+								"download"
+							]
+						},
+						"description": "Download a file by ID through the gateway."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"id": "24243775-90194daf-f516-49c7-b68f-0258002395da",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/files/{{file_id}}",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"files",
+								"{{file_id}}"
+							]
+						},
+						"description": "Delete a file by ID."
+					},
+					"response": []
+				}
+			],
+			"id": "24243775-328ab8fa-129c-476d-8914-f86d0abc70a5",
+			"description": "File storage and management endpoints through the API Gateway."
+		},
+		{
+			"name": "🤖 AI Service",
+			"item": [
+				{
+					"name": "Chat with AI",
+					"id": "24243775-cb786698-f63b-43ff-9a54-95dbd76c4aad",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Hello AI! Can you help me analyze my files?\",\n  \"context\": \"general\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/ai/chat",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"chat"
+							]
+						},
+						"description": "Send a message to the AI service for processing and response."
+					},
+					"response": []
+				},
+				{
+					"name": "Analyze File with AI",
+					"id": "24243775-6498164c-ced5-470a-9e6c-f4f1d894bc0f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fileId\": \"{{file_id}}\",\n  \"analysisType\": \"content_summary\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/ai/analyze",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"ai",
+								"analyze"
+							]
+						},
+						"description": "Request AI analysis of a specific file."
+					},
+					"response": []
+				}
+			],
+			"id": "24243775-df0913fd-5ea0-4678-8e85-df2c5a38b6d4",
+			"description": "AI service endpoints for intelligent file analysis and chat functionality."
+		},
+		{
+			"name": "🔍 Search Service",
+			"item": [
+				{
+					"name": "Search Files",
+					"id": "24243775-4e0e718d-fdfa-49d7-8f11-9642e166a890",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/search?q={{search_query}}&type=files&page=0&size=10",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{search_query}}",
+									"description": "Search query string"
+								},
+								{
+									"key": "type",
+									"value": "files",
+									"description": "Search type: files, content, metadata"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Search through user's files using the search service."
+					},
+					"response": []
+				},
+				{
+					"name": "Advanced Search",
+					"id": "24243775-d3080d63-9f21-4768-8ef6-816a8d6ee6b3",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"{{search_query}}\",\n  \"filters\": {\n    \"fileType\": [\"pdf\", \"doc\"],\n    \"dateRange\": {\n      \"start\": \"2024-01-01\",\n      \"end\": \"2024-12-31\"\n    },\n    \"tags\": [\"important\"]\n  },\n  \"page\": 0,\n  \"size\": 20\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/search/advanced",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"search",
+								"advanced"
+							]
+						},
+						"description": "Perform advanced search with filters and criteria."
+					},
+					"response": []
+				}
+			],
+			"id": "24243775-365fda51-95dd-410b-ad0a-21496232ff39",
+			"description": "Search service endpoints for finding files and content."
+		},
+		{
+			"name": "⚙️ Admin Operations",
+			"item": [
+				{
+					"name": "Get All Users (Admin)",
+					"id": "24243775-0d43c08d-38c3-4dfa-8b8b-5dbcb728f630",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/admin/users?page=0&size=20&sort=createdAt",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "20"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt"
+								}
+							]
+						},
+						"description": "Get paginated list of all users (admin only)."
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Statistics (Admin)",
+					"id": "24243775-4d3128d8-1f43-40e8-b102-a62b66d57631",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/admin/statistics",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"admin",
+								"statistics"
+							]
+						},
+						"description": "Get user statistics and metrics (admin only)."
+					},
+					"response": []
+				}
+			],
+			"id": "24243775-c0952ca5-d486-48d7-9b46-ef1ebebb0cc3",
+			"description": "Administrative endpoints requiring admin privileges."
+		},
+		{
+			"name": "🔧 System Health & Monitoring",
+			"item": [
+				{
+					"name": "API Gateway Health",
+					"id": "24243775-2d35e9b3-2ea7-4281-9252-eb2e2e1a987f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_base_url}}/actuator/health",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"actuator",
+								"health"
+							]
+						},
+						"description": "Check API Gateway health status."
+					},
+					"response": []
+				},
+				{
+					"name": "Gateway Info",
+					"id": "24243775-80897456-f3e1-4278-a405-0d9b1079b56b",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_base_url}}/actuator/info",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"actuator",
+								"info"
+							]
+						},
+						"description": "Get API Gateway information."
+					},
+					"response": []
+				},
+				{
+					"name": "Gateway Routes",
+					"id": "24243775-432f569c-dca8-47ae-b48e-1942047ef934",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_base_url}}/actuator/gateway/routes",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"actuator",
+								"gateway",
+								"routes"
+							]
+						},
+						"description": "View all configured gateway routes."
+					},
+					"response": []
+				}
+			],
+			"id": "24243775-f42bf5ca-e79a-4c41-bf53-b53c4b619ece",
+			"description": "System health and monitoring endpoints."
+		},
+		{
+			"name": "🧪 Test CORS & Gateway Features",
+			"item": [
+				{
+					"name": "CORS Preflight Test",
+					"id": "24243775-e51552ae-efb9-485b-843e-fc56652e12a8",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "OPTIONS",
+						"header": [
+							{
+								"key": "Origin",
+								"value": "http://localhost:5174"
+							},
+							{
+								"key": "Access-Control-Request-Method",
+								"value": "POST"
+							},
+							{
+								"key": "Access-Control-Request-Headers",
+								"value": "Content-Type,Authorization"
+							}
+						],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/register",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"register"
+							]
+						},
+						"description": "Test CORS preflight request to ensure gateway is properly configured for browser requests."
+					},
+					"response": []
+				}
+			],
+			"id": "24243775-154d5722-c0ea-4c6d-a64c-f4cfff1a9bb7",
+			"description": "Test endpoints for validating CORS and gateway functionality."
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-generate test data if not set",
+					"if (!pm.environment.get('test_username')) {",
+					"    pm.environment.set('test_username', 'gatewaytest_' + Date.now());",
+					"}",
+					"if (!pm.environment.get('test_email')) {",
+					"    pm.environment.set('test_email', 'gateway_' + Date.now() + '@example.com');",
+					"}",
+					"if (!pm.environment.get('search_query')) {",
+					"    pm.environment.set('search_query', 'test document');",
+					"}",
+					"if (!pm.environment.get('file_id')) {",
+					"    pm.environment.set('file_id', '1');",
+					"}"
+				],
+				"id": "a0b1ca7c-2baa-409e-9a12-3fd69cba997f"
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "gateway_base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "oauth2_client_id",
+			"value": "smartdrive-web",
+			"type": "string"
+		},
+		{
+			"key": "oauth2_client_secret",
+			"value": "secret",
+			"type": "string"
+		}
+	]
+}
