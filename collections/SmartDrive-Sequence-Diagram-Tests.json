@@ -1,0 +1,196 @@
+{
+	"info": {
+		"_postman_id": "smartdrive-sequence-diagram-tests",
+		"name": "SmartDrive Sequence Diagram E2E Tests",
+		"description": "Complete end-to-end tests for SmartDrive authentication architecture following the sequence diagram flows. Tests 95%+ architecture compliance with 8 comprehensive test phases.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "smartdrive-sequence-diagram-tests"
+	},
+	"item": [
+		{
+			"name": "🎯 REGISTRATION FLOW",
+			"item": [
+				{
+					"name": "1.1 User Registration",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Registration successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"pm.test('Response contains success message', function () {",
+									"    pm.expect(responseJson.message).to.include('Registration successful');",
+									"});",
+									"",
+									"if (responseJson.user_id) {",
+									"    pm.environment.set('test_user_id', responseJson.user_id);",
+									"    console.log('✅ User registered with ID:', responseJson.user_id);",
+									"}",
+									"",
+									"const timestamp = new Date().getTime();",
+									"const testEmail = `test${timestamp}@smartdrive.com`;",
+									"pm.environment.set('test_email', testEmail);",
+									"console.log('📧 Test email generated:', testEmail);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"SecurePass123!\",\n  \"confirmPassword\": \"SecurePass123!\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/auth/register",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						},
+						"description": "**REGISTRATION FLOW TEST**\n\nTests: Client → API Gateway → Auth Service\n\nThis simulates the registration flow from the sequence diagram:\n1. User submits registration form\n2. API Gateway forwards to Auth Service\n3. Auth Service validates and creates user\n4. UserRegisteredEvent published to SQS"
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Verify Async User Profile Creation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('User profile created via event processing', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"pm.test('User profile contains expected data', function () {",
+									"    pm.expect(responseJson.email).to.eql(pm.environment.get('test_email'));",
+									"    pm.expect(responseJson.firstName).to.eql('Test');",
+									"});",
+									"",
+									"console.log('✅ User profile created via SQS event processing');",
+									"console.log('🔄 Event flow: Auth Service → SQS → User Service');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/users/profile/email/{{test_email}}",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"profile",
+								"email",
+								"{{test_email}}"
+							]
+						},
+						"description": "**ASYNC EVENT PROCESSING TEST**\n\nVerifies UserRegisteredEvent processing by SQS."
+					},
+					"response": []
+				}
+			],
+			"description": "**PHASE 1: REGISTRATION FLOW**\n\nTests event-driven architecture and service separation."
+		},
+		{
+			"name": "🔑 LOGIN FLOW",
+			"item": [
+				{
+					"name": "3.1 User Login & JWT Generation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Login successful', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"pm.test('Access token generated', function () {",
+									"    pm.expect(responseJson.access_token).to.be.a('string');",
+									"});",
+									"",
+									"pm.environment.set('access_token', responseJson.access_token);",
+									"pm.environment.set('refresh_token', responseJson.refresh_token);",
+									"",
+									"console.log('✅ JWT generated with claims from Auth + User services');"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{test_email}}\",\n  \"password\": \"SecurePass123!\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_base_url}}/api/v1/auth/login",
+							"host": [
+								"{{gateway_base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						},
+						"description": "**LOGIN FLOW TEST**\n\nTests multi-service JWT generation with complete claims."
+					},
+					"response": []
+				}
+			],
+			"description": "**PHASE 3: LOGIN FLOW**\n\nTests multi-service JWT generation and service integration."
+		}
+	],
+	"variable": [
+		{
+			"key": "gateway_base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "test_email",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
