@@ -35,7 +35,7 @@ jobs:
         echo "🔄 Starting User Service Collection sync..."
         echo "API Key: ${POSTMAN_API_KEY:0:10}..."
         echo "Collection ID: $POSTMAN_USER_COLLECTION_ID"
-        
+
         if [ -f "collections/SmartDrive-User-Service-Collection.json" ]; then
           echo "📁 Collection file found, updating..."
           # Create the proper request body using jq
@@ -43,19 +43,19 @@ jobs:
           echo "📄 Request body preview (first 200 chars):"
           head -c 200 temp_request.json
           echo "..."
-          
+
           response=$(curl -s -w "%{http_code}" -X PUT \
             -H "X-API-Key: $POSTMAN_API_KEY" \
             -H "Content-Type: application/json" \
             -d @temp_request.json \
             "https://api.getpostman.com/collections/$POSTMAN_USER_COLLECTION_ID")
-          
+
           http_code="${response: -3}"
           body="${response%???}"
-          
+
           echo "Response Code: $http_code"
           echo "Response Body: $body"
-          
+
           if [ "$http_code" = "200" ]; then
             echo "✅ User Service Collection updated successfully!"
           else
@@ -66,7 +66,88 @@ jobs:
           echo "❌ Collection file not found!"
           exit 1
         fi
-        
+
+    - name: Sync Sequence Diagram Tests Collection
+      env:
+        POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+        POSTMAN_WORKSPACE_ID: ${{ secrets.POSTMAN_WORKSPACE_ID }}
+        POSTMAN_SEQUENCE_DIAGRAM_COLLECTION_ID: ${{ secrets.POSTMAN_SEQUENCE_DIAGRAM_COLLECTION_ID }}
+      run: |
+        echo "🔄 Starting Sequence Diagram Tests Collection sync..."
+        echo "API Key: ${POSTMAN_API_KEY:0:10}..."
+        echo "Collection ID: $POSTMAN_SEQUENCE_DIAGRAM_COLLECTION_ID"
+
+        if [ -f "collections/SmartDrive-Sequence-Diagram-Tests.json" ]; then
+          echo "📁 Sequence Diagram Tests Collection file found, updating..."
+          # Create the proper request body using jq
+          jq -n --slurpfile collection collections/SmartDrive-Sequence-Diagram-Tests.json '{collection: $collection[0]}' > temp_sequence_request.json
+          echo "📄 Request body preview (first 200 chars):"
+          head -c 200 temp_sequence_request.json
+          echo "..."
+
+          response=$(curl -s -w "%{http_code}" -X PUT \
+            -H "X-API-Key: $POSTMAN_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @temp_sequence_request.json \
+            "https://api.getpostman.com/collections/$POSTMAN_SEQUENCE_DIAGRAM_COLLECTION_ID")
+
+          http_code="${response: -3}"
+          body="${response%???}"
+
+          echo "Response Code: $http_code"
+          echo "Response Body: $body"
+
+          if [ "$http_code" = "200" ]; then
+            echo "✅ Sequence Diagram Tests Collection updated successfully!"
+          else
+            echo "❌ Failed to update Sequence Diagram Tests collection. HTTP Code: $http_code"
+            exit 1
+          fi
+        else
+          echo "⚠️ Sequence Diagram Tests Collection file not found, skipping..."
+        fi
+
+    - name: Sync Gateway Complete Collection
+      env:
+        POSTMAN_API_KEY: ${{ secrets.POSTMAN_API_KEY }}
+        POSTMAN_WORKSPACE_ID: ${{ secrets.POSTMAN_WORKSPACE_ID }}
+        POSTMAN_GATEWAY_COLLECTION_ID: ${{ secrets.POSTMAN_GATEWAY_COLLECTION_ID }}
+      run: |
+        echo "🔄 Starting Gateway Complete Collection sync..."
+        echo "API Key: ${POSTMAN_API_KEY:0:10}..."
+        echo "Collection ID: $POSTMAN_GATEWAY_COLLECTION_ID"
+
+        if [ -f "collections/SmartDrive-Gateway-Complete-Collection.json" ]; then
+          echo "📁 Gateway Collection file found, updating..."
+          # Create the proper request body using jq
+          jq -n --slurpfile collection collections/SmartDrive-Gateway-Complete-Collection.json '{collection: $collection[0]}' > temp_gateway_request.json
+          echo "📄 Request body preview (first 200 chars):"
+          head -c 200 temp_gateway_request.json
+          echo "..."
+
+          response=$(curl -s -w "%{http_code}" -X PUT \
+            -H "X-API-Key: $POSTMAN_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @temp_gateway_request.json \
+            "https://api.getpostman.com/collections/$POSTMAN_GATEWAY_COLLECTION_ID")
+
+          http_code="${response: -3}"
+          body="${response%???}"
+
+          echo "Response Code: $http_code"
+          echo "Response Body: $body"
+
+          if [ "$http_code" = "200" ]; then
+            echo "✅ Gateway Complete Collection updated successfully!"
+          else
+            echo "❌ Failed to update Gateway collection. HTTP Code: $http_code"
+            exit 1
+          fi
+        else
+          echo "❌ Gateway Collection file not found!"
+          exit 1
+        fi
+
 
         
     - name: Notify Success

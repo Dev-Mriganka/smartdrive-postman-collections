@@ -10,9 +10,10 @@ This file is used to trigger the Postman collection sync workflow.
 
 ## Last sync trigger:
 
-- Date: 2024-01-26
-- Time: Initial setup
-- Status: Ready for testing
+- Date: 2024-09-03
+- Time: Updated workflow for sequence diagram tests
+- Status: Ready for production testing
+- Collections: User Service, Gateway, Sequence Diagram Tests
 
 ## Usage:
 
